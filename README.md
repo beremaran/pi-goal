@@ -12,8 +12,7 @@ Goal](https://github.com/beremaran/opencode-goal). It uses Pi's extension API
 and session entries rather than an external state directory, so goal state
 follows the current session branch and survives restarts and compaction.
 
-It is a Pi package, not an OpenCode plugin. No OpenCode CLI or npm publication
-is required.
+It is a Pi package, not an OpenCode plugin.
 
 ## Requirements
 
@@ -167,8 +166,7 @@ pi -e ./extensions/pi-goal.ts
 There is no separate build step. `npm run check` runs the formatter check,
 typecheck, and tests; `npm pack --dry-run` also verifies the package contents.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow and
-[RELEASING.md](RELEASING.md) for maintainer release instructions.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow.
 
 See Pi's [package documentation](https://pi.dev/docs/latest/packages) and
 [extension documentation](https://pi.dev/docs/latest/extensions) for package

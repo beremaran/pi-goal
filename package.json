@@ -17,10 +17,6 @@
   },
   "homepage": "https://github.com/beremaran/pi-goal",
   "funding": "https://github.com/sponsors/beremaran",
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
-  },
   "keywords": [
     "pi",
     "pi-package",
@@ -45,8 +41,7 @@
     "check": "npm run format:check && npm run typecheck && npm test",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepack": "npm run typecheck",
-    "prepublishOnly": "npm run check"
+    "prepack": "npm run typecheck"
   },
   "pi": {
     "extensions": [
