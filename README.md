@@ -53,7 +53,7 @@ The equivalent global settings entry is:
 Pin a release tag in shared or automated configuration:
 
 ```bash
-pi install git:github.com/beremaran/pi-goal@v0.1.0
+pi install git:github.com/beremaran/pi-goal@v0.1.1
 ```
 
 ## Usage

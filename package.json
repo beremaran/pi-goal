@@ -1,6 +1,6 @@
 {
   "name": "@beremaran/pi-goal",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Persistent /goal workflows with independent completion evaluation for Pi",
   "type": "module",
   "license": "MIT",

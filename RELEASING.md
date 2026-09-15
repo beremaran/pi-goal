@@ -10,7 +10,7 @@ This document is for maintainers.
 4. Create a GitHub release whose tag exactly matches `v<package version>`:
 
    ```bash
-   gh release create v0.1.0 --generate-notes
+   gh release create v0.1.1 --generate-notes
    ```
 
 The release workflow validates the tag, runs the checks, and publishes the
