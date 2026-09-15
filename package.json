@@ -1,7 +1,7 @@
 {
   "name": "@beremaran/pi-goal",
   "version": "0.1.0",
-  "description": "Persistent, independently evaluated /goal workflows for Pi",
+  "description": "Persistent /goal workflows with independent completion evaluation for Pi",
   "type": "module",
   "license": "MIT",
   "author": {
@@ -15,18 +15,19 @@
   "bugs": {
     "url": "https://github.com/beremaran/pi-goal/issues"
   },
-  "homepage": "https://github.com/beremaran/pi-goal#readme",
+  "homepage": "https://github.com/beremaran/pi-goal",
   "funding": "https://github.com/sponsors/beremaran",
   "publishConfig": {
     "access": "public",
     "provenance": true
   },
   "keywords": [
+    "pi",
     "pi-package",
     "pi-extension",
-    "goal",
-    "autonomous-agent",
-    "developer-tools"
+    "goal-tracking",
+    "coding-agent",
+    "agent-workflow"
   ],
   "files": [
     "extensions",

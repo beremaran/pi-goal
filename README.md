@@ -1,17 +1,26 @@
 # Pi Goal
 
 [![CI](https://github.com/beremaran/pi-goal/actions/workflows/ci.yml/badge.svg)](https://github.com/beremaran/pi-goal/actions/workflows/ci.yml)
-[![npm](https://img.shields.io/npm/v/@beremaran/pi-goal)](https://www.npmjs.com/package/@beremaran/pi-goal)
-[![license](https://img.shields.io/npm/l/@beremaran/pi-goal)](LICENSE)
+[![license](https://img.shields.io/github/license/beremaran/pi-goal)](LICENSE)
 
 A persistent `/goal` workflow for [Pi](https://pi.dev): define a completion
 condition once, let Pi work across turns, and stop only when an independent
 evaluator finds enough evidence that the condition is satisfied.
 
-This is a Pi port of [OpenCode Goal](https://github.com/beremaran/opencode-goal).
-It uses Pi's extension API and session entries rather than an external state
-directory, so goal state follows the current session branch and survives
-restarts and compaction.
+This is a Pi package with one extension, ported from [OpenCode
+Goal](https://github.com/beremaran/opencode-goal). It uses Pi's extension API
+and session entries rather than an external state directory, so goal state
+follows the current session branch and survives restarts and compaction.
+
+It is a Pi package, not an OpenCode plugin. No OpenCode CLI or npm publication
+is required.
+
+## Requirements
+
+- Pi with package and extension support.
+- Node.js 20 or newer.
+- Provider credentials configured in Pi for the current model or a selected
+  evaluator model. Each evaluation is an additional model request.
 
 ## Install
 
@@ -21,13 +30,19 @@ Try it for one run:
 pi -e git:github.com/beremaran/pi-goal
 ```
 
-Install it for all projects:
+Install it for all projects. This writes to `~/.pi/agent/settings.json`:
 
 ```bash
 pi install git:github.com/beremaran/pi-goal
 ```
 
-Or add the package to `~/.pi/agent/settings.json`:
+Install it for the current project only. This writes to `.pi/settings.json`:
+
+```bash
+pi install -l git:github.com/beremaran/pi-goal
+```
+
+The equivalent global settings entry is:
 
 ```json
 {
@@ -59,10 +74,31 @@ Control the current session goal with:
 /goal help     Show command syntax
 ```
 
+`--tokens` accepts a positive number with an optional `k` or `m` suffix; the
+resulting token count must be an integer.
+
 When a user explicitly asks for persistent goal tracking in ordinary language,
 Pi can start it with the `create_goal` tool. The tool refuses to replace an
 unfinished goal. `get_goal` reports state and `update_goal` records a completion
-claim for independent verification or a repeated external blocker.
+claim for independent verification or a repeated external blocker. A blocked
+claim is available only after three goal turns; its reason should describe the
+repeated external blocker.
+
+## Package contents
+
+The `package.json` Pi manifest loads `./extensions/pi-goal.ts`:
+
+```json
+{
+  "pi": {
+    "extensions": ["./extensions/pi-goal.ts"]
+  }
+}
+```
+
+The package provides no skills, prompt templates, or themes. The extension uses
+Pi's active theme for its status and widget colors; it does not install or
+select a theme.
 
 ## How it works
 
@@ -78,26 +114,33 @@ Interrupted or failed agent turns pause the goal instead of risking an
 unverified loop. Token and turn budgets are optional; without them, an active
 goal continues until it completes, is paused, cleared, blocked, or encounters
 an evaluator failure.
+Configured token or turn budgets stop continuation when reached.
 
-The active goal appears in Pi's footer and in a compact widget above the editor.
+In the interactive UI, the active goal appears in Pi's footer and in a compact
+widget above the editor. Non-interactive runs do not render those UI elements.
 
 ## Configuration
 
 The extension reads these optional environment variables at startup:
 
-| Variable                        | Meaning                                                                 |
-| ------------------------------- | ----------------------------------------------------------------------- |
-| `PI_GOAL_EVALUATOR_MODEL`       | Evaluator model in `provider/model` form; defaults to the current model |
-| `PI_GOAL_MAX_TRANSCRIPT_CHARS`  | Maximum transcript sent to the evaluator; default `48000`               |
-| `PI_GOAL_DEFAULT_TOKEN_BUDGET`  | Default token budget for `create_goal`                                  |
-| `PI_GOAL_DEFAULT_MAX_TURNS`     | Default turn budget for `create_goal`                                   |
-| `PI_GOAL_CONTINUATION_DELAY_MS` | Delay before automatic continuation; default `0`                        |
+| Variable                        | Meaning                                                                   |
+| ------------------------------- | ------------------------------------------------------------------------- |
+| `PI_GOAL_EVALUATOR_MODEL`       | Evaluator model in `provider/model` form; defaults to the current model   |
+| `PI_GOAL_MAX_TRANSCRIPT_CHARS`  | Maximum transcript sent to the evaluator; default `48000`, minimum `1024` |
+| `PI_GOAL_DEFAULT_TOKEN_BUDGET`  | Default token budget for `/goal` and `create_goal`                        |
+| `PI_GOAL_DEFAULT_MAX_TURNS`     | Default turn budget for `/goal` and `create_goal`                         |
+| `PI_GOAL_CONTINUATION_DELAY_MS` | Delay before automatic continuation; default `0`                          |
 
 For example:
 
 ```bash
 PI_GOAL_EVALUATOR_MODEL=anthropic/claude-haiku-4-5 pi
 ```
+
+Pi's normal provider credentials are used for the evaluator request. An
+unavailable evaluator model falls back to Pi's current model. If no usable
+model or credentials are available, the goal pauses and can be resumed after
+the problem is fixed.
 
 Goal state is stored in Pi's session JSONL as `pi-goal.state` custom entries.
 Custom entries do not enter the model context, and branch navigation naturally
@@ -112,6 +155,7 @@ git clone https://github.com/beremaran/pi-goal.git
 cd pi-goal
 npm ci
 npm run check
+npm pack --dry-run
 ```
 
 Load the checkout directly:
@@ -120,19 +164,28 @@ Load the checkout directly:
 pi -e ./extensions/pi-goal.ts
 ```
 
+There is no separate build step. `npm run check` runs the formatter check,
+typecheck, and tests; `npm pack --dry-run` also verifies the package contents.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the contribution workflow and
 [RELEASING.md](RELEASING.md) for maintainer release instructions.
+
+See Pi's [package documentation](https://pi.dev/docs/latest/packages) and
+[extension documentation](https://pi.dev/docs/latest/extensions) for package
+sources, project-local settings, and extension loading details.
 
 ## Limitations
 
 - The evaluator can judge only transcript evidence. If work happened but was
   not surfaced, it asks for stronger evidence and continues.
+- Each evaluation is a separate model request and requires working provider
+  credentials; it may use additional model credits.
 - This extension cannot bypass provider rate, usage, trust, or permission
   limits.
 - A provider or evaluator failure pauses the goal; use `/goal resume` after the
   problem is fixed.
-- Automatic continuation is intentionally conservative and may use additional
-  model credits.
+- Automatic continuation is intentionally conservative and may require several
+  turns before the evaluator accepts completion.
 
 ## License
 
